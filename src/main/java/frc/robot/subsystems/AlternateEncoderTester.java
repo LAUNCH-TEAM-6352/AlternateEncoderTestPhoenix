@@ -28,8 +28,8 @@ public class AlternateEncoderTester extends SubsystemBase
     private boolean atTargetPosition;
     private boolean isPositioningStarted;
     private double lastPosition;
-    private final double minPosition = 0;
-    private final double maxPosition = 100;
+    public static final double minPosition = 0;
+    public static final double maxPosition = 20;
 
     /** Creates a new ExampleSubsystem. */
     public AlternateEncoderTester()
@@ -40,7 +40,7 @@ public class AlternateEncoderTester extends SubsystemBase
                 .countsPerRevolution(8192)
                 .inverted(true) // by default, cw rotation is negative
                 .measurementPeriod(100)
-                .positionConversionFactor(12) // approx 1 count per inch?
+                .positionConversionFactor(1)
                 .setSparkMaxDataPortConfig()
                 .velocityConversionFactor(1); // velocity will be measured in hex shaft rotations per minuite
 
@@ -78,7 +78,7 @@ public class AlternateEncoderTester extends SubsystemBase
         motor.set(speed);
     }
 
-    private double getPosition()
+    public double getPosition()
     {
         return motor.getAlternateEncoder().getPosition();
     }
@@ -116,10 +116,14 @@ public class AlternateEncoderTester extends SubsystemBase
     public void periodic()
     {
         // This method will be called once per scheduler run
+        var position = getPosition();
+
+        SmartDashboard.putNumber("Position", position);
+        SmartDashboard.putNumber("Velocity", motor.getAlternateEncoder().getVelocity());
+        SmartDashboard.putNumber("Speed", motor.getAppliedOutput());
 
         if (isPositioningStarted)
         {
-            double position = getPosition();
             if ((Math.abs(position - targetPosition) < targetTolerance) && Math.abs(position - lastPosition) < targetTolerance)
             {
                 atTargetPosition = true;
@@ -130,7 +134,5 @@ public class AlternateEncoderTester extends SubsystemBase
                 lastPosition = position;
             }
         }
-        SmartDashboard.putNumber("Position", motor.getAlternateEncoder().getPosition());
-        SmartDashboard.putNumber("Velocity", motor.getAlternateEncoder().getVelocity());
     }
 }

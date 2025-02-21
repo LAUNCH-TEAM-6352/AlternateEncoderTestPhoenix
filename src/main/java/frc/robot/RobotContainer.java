@@ -5,10 +5,12 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.RunTestMotorWithJoystick;
+import frc.robot.commands.SetTesterPosition;
 import frc.robot.subsystems.AlternateEncoderTester;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -24,11 +26,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer
 {
     // The robot's subsystems and commands are defined here...
-    private final AlternateEncoderTester m_exampleSubsystem = new AlternateEncoderTester();
+    private final AlternateEncoderTester alternateEncoderTester = new AlternateEncoderTester();
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
-    private final CommandXboxController m_driverController = new CommandXboxController(
-        OperatorConstants.kDriverControllerPort);
+    private final CommandJoystick joystick = new CommandJoystick(0);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -37,6 +38,9 @@ public class RobotContainer
     {
         // Configure the trigger bindings
         configureBindings();
+
+        //Configure default commands:
+        configureDefaultCommands();
     }
 
     /**
@@ -55,14 +59,18 @@ public class RobotContainer
      */
     private void configureBindings()
     {
-        // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-        new Trigger(m_exampleSubsystem::exampleCondition)
-            .onTrue(new ExampleCommand(m_exampleSubsystem));
+        joystick.button(2).onTrue(new InstantCommand(() -> alternateEncoderTester.resetPosition()));
+        joystick.button(7).onTrue(new SetTesterPosition(alternateEncoderTester, 0));
+        joystick.button(8).onTrue(new SetTesterPosition(alternateEncoderTester, 5));
+        joystick.button(9).onTrue(new SetTesterPosition(alternateEncoderTester, 10));
+        joystick.button(10).onTrue(new SetTesterPosition(alternateEncoderTester, 15));
+        joystick.button(11).onTrue(new SetTesterPosition(alternateEncoderTester, 20));
+        joystick.button(12).onTrue(new RunTestMotorWithJoystick(alternateEncoderTester, joystick));
+    }
 
-        // Schedule `exampleMethodCommand` when the Xbox controller's B button is
-        // pressed,
-        // cancelling on release.
-        m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    private void configureDefaultCommands()
+    {
+        //alternateEncoderTester.setDefaultCommand(new RunTestMotorWithJoystick(alternateEncoderTester, joystick));
     }
 
     /**
@@ -72,7 +80,6 @@ public class RobotContainer
      */
     public Command getAutonomousCommand()
     {
-        // An example command will be run in autonomous
-        return Autos.exampleAuto(m_exampleSubsystem);
+        return null;
     }
 }

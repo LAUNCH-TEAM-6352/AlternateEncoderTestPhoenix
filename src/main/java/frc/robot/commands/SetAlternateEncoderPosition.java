@@ -4,23 +4,36 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
+import java.util.HashMap;
 
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AlternateEncoderTester;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class SetTesterPosition extends Command
+public class SetAlternateEncoderPosition extends Command
 
 {
     private final AlternateEncoderTester alternateEncoderTester;
     private final double position;
 
+    private final HashMap<Integer, Double> positionMap = new HashMap<Integer, Double>()
+    {
+        {
+            put(-1, 0.0);
+            put(0, 5.0);
+            put(90, 10.0);
+            put(190, 15.0);
+            put(270, 20.0);
+        }
+    };
+
     /** Creates a new SetTesterPosition. */
-    public SetTesterPosition(AlternateEncoderTester alternateEncoderTester, double position)
+    public SetAlternateEncoderPosition(AlternateEncoderTester alternateEncoderTester, XboxController gamepad)
     {
         this.alternateEncoderTester = alternateEncoderTester;
-        this.position = position;
+
+        this.position = positionMap.get(gamepad.getPOV());
 
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(alternateEncoderTester);

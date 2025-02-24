@@ -4,15 +4,16 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.AlternateEncoderTester;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.PrimaryEncoderTester;
 
 /** An example command that uses an example subsystem. */
-public class RunTestMotorWithJoystick extends Command
+public class RunPrimaryEncoderWithGamepad extends Command
 {
-    private final AlternateEncoderTester alternateEncoderTester;
-    private final CommandJoystick joystick;
+    private final PrimaryEncoderTester encoderTester;
+    private final CommandXboxController gamepad;
 
     /**
      * Creates a new ExampleCommand.
@@ -20,13 +21,13 @@ public class RunTestMotorWithJoystick extends Command
      * @param alternateEncoderTester
      *            The subsystem used by this command.
      */
-    public RunTestMotorWithJoystick(AlternateEncoderTester alternateEncoderTester, CommandJoystick joystick)
+    public RunPrimaryEncoderWithGamepad(PrimaryEncoderTester encoderTester, CommandXboxController gamepad)
     {
-        this.alternateEncoderTester = alternateEncoderTester;
-        this.joystick = joystick;
+        this.encoderTester = encoderTester;
+        this.gamepad = gamepad;
 
         // Use addRequirements() here to declare subsystem dependencies.
-        addRequirements(alternateEncoderTester);
+        addRequirements(encoderTester);
     }
 
     // Called when the command is initially scheduled.
@@ -39,20 +40,21 @@ public class RunTestMotorWithJoystick extends Command
     @Override
     public void execute()
     {
-        var speed = -joystick.getThrottle() / 2.0;
-        var position = alternateEncoderTester.getPosition();
-        if ((speed < 0 && position <= AlternateEncoderTester.minPosition) ||
-            (speed > 0 && position >= AlternateEncoderTester.maxPosition))
+        var speed = -gamepad.getRightY() / 2.0;
+        var position = encoderTester.getPosition();
+        if ((speed < 0 && position <= encoderTester.minPosition) ||
+            (speed > 0 && position >= encoderTester.maxPosition))
         {
             speed = 0;
-            // turn on rumble
+            gamepad.setRumble(RumbleType.kBothRumble, 1);
         }
         else
         {
             // turn off rumble
+            gamepad.setRumble(RumbleType.kBothRumble, 0);
         }
 
-        alternateEncoderTester.setMotorSpeed(speed);
+        encoderTester.setMotorSpeed(speed);
     }
 
     // Called once the command ends or is interrupted.

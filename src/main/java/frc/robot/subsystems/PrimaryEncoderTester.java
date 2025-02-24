@@ -9,9 +9,9 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SoftLimitConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -19,7 +19,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class AlternateEncoderTester extends SubsystemBase
+public class PrimaryEncoderTester extends SubsystemBase
 {
     private final SparkMax motor = new SparkMax(1, MotorType.kBrushless);
 
@@ -29,19 +29,14 @@ public class AlternateEncoderTester extends SubsystemBase
     private boolean isPositioningStarted;
     private double lastPosition;
     public final double minPosition = 0;
-    public final double maxPosition = 20;
+    public final double maxPosition = 4096;
 
     /** Creates a new ExampleSubsystem. */
-    public AlternateEncoderTester()
+    public PrimaryEncoderTester()
     {
-        AlternateEncoderConfig encoderConfig =
-            new AlternateEncoderConfig()
-                .averageDepth(64)
-                .countsPerRevolution(8192)
-                .inverted(true) // by default, cw rotation is negative
-                .measurementPeriod(100)
+        EncoderConfig encoderConfig =
+            new EncoderConfig()
                 .positionConversionFactor(1)
-                .setSparkMaxDataPortConfig()
                 .velocityConversionFactor(1); // velocity will be measured in hex shaft rotations per minuite
 
         SoftLimitConfig softLimitConfig = 
@@ -55,8 +50,8 @@ public class AlternateEncoderTester extends SubsystemBase
             new ClosedLoopConfig()
                 .pidf(0.15, 0.0, 0.0, 0.0)
                 .iZone(0.0)
-                .outputRange(-0.1, +0.1)
-                .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder);
+                .outputRange(-0.5, +0.5)
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
 
         SparkMaxConfig config = new SparkMaxConfig();
         config
@@ -80,12 +75,12 @@ public class AlternateEncoderTester extends SubsystemBase
 
     public double getPosition()
     {
-        return motor.getAlternateEncoder().getPosition();
+        return motor.getEncoder().getPosition();
     }
 
     public void resetPosition()
     {
-        motor.getAlternateEncoder().setPosition(0);
+        motor.getEncoder().setPosition(0);
     }
 
     public void setPosition(double position, double tolerance)
@@ -118,9 +113,9 @@ public class AlternateEncoderTester extends SubsystemBase
         // This method will be called once per scheduler run
         var position = getPosition();
 
-        SmartDashboard.putNumber("Alt Pos", position);
-        SmartDashboard.putNumber("Alt RPM", motor.getAlternateEncoder().getVelocity());
-        SmartDashboard.putNumber("Alt Spd", motor.getAppliedOutput());
+        SmartDashboard.putNumber("Pri Pos", position);
+        SmartDashboard.putNumber("Pri RPM", motor.getEncoder().getVelocity());
+        SmartDashboard.putNumber("Pri Spd", motor.getAppliedOutput());
 
         if (isPositioningStarted)
         {

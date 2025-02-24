@@ -4,15 +4,20 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.RunTestMotorWithJoystick;
-import frc.robot.commands.SetTesterPosition;
-import frc.robot.subsystems.AlternateEncoderTester;
+import java.util.Optional;
+
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.RunAlternateEncoderWithGamepad;
+import frc.robot.commands.RunPrimaryEncoderWithGamepad;
+import frc.robot.commands.SetAlternateEncoderPosition;
+import frc.robot.commands.SetPrimaryEncoderPosition;
+import frc.robot.subsystems.AlternateEncoderTester;
+import frc.robot.subsystems.PrimaryEncoderTester;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -26,21 +31,30 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer
 {
     // The robot's subsystems and commands are defined here...
-    private final AlternateEncoderTester alternateEncoderTester = new AlternateEncoderTester();
+    private final Optional<AlternateEncoderTester> alternateEncoderTester;
+    private final Optional<PrimaryEncoderTester> primaryEncoderTester;
 
-    // Replace with CommandPS4Controller or CommandJoystick if needed
-    private final CommandJoystick joystick = new CommandJoystick(0);
+    private final CommandXboxController commandGamepad = new CommandXboxController(0);
+    public final XboxController gamepad = new XboxController(0);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer()
     {
+        //alternateEncoderTester = Optional.of(new AlternateEncoderTester())
+        alternateEncoderTester = Optional.empty();
+
+        primaryEncoderTester = Optional.of(new PrimaryEncoderTester());
+        //primmaryEncoderTester = Optional.empty();
+
         // Configure the trigger bindings
         configureBindings();
 
         //Configure default commands:
         configureDefaultCommands();
+
+        SmartDashboard.putData(gamepad);
     }
 
     /**
@@ -59,19 +73,30 @@ public class RobotContainer
      */
     private void configureBindings()
     {
-        joystick.button(2).onTrue(new InstantCommand(() -> alternateEncoderTester.resetPosition()));
-        joystick.button(7).onTrue(new SetTesterPosition(alternateEncoderTester, 0));
-        joystick.button(8).onTrue(new SetTesterPosition(alternateEncoderTester, 5));
-        joystick.button(9).onTrue(new SetTesterPosition(alternateEncoderTester, 10));
-        joystick.button(10).onTrue(new SetTesterPosition(alternateEncoderTester, 15));
-        joystick.button(11).onTrue(new SetTesterPosition(alternateEncoderTester, 20));
-        joystick.button(12).onTrue(new RunTestMotorWithJoystick(alternateEncoderTester, joystick));
+        alternateEncoderTester.ifPresent(this::configureBindings);
+        primaryEncoderTester.ifPresent(this::configureBindings);
     }
+
 
     private void configureDefaultCommands()
     {
         //alternateEncoderTester.setDefaultCommand(new RunTestMotorWithJoystick(alternateEncoderTester, joystick));
     }
+
+    private void configureBindings(AlternateEncoderTester encoderTester)
+    {        
+        commandGamepad.x().onTrue(new InstantCommand(() -> encoderTester.resetPosition()));
+        commandGamepad.a().onTrue(new SetAlternateEncoderPosition(encoderTester, gamepad));
+        commandGamepad.leftStick().onTrue(new RunAlternateEncoderWithGamepad(encoderTester, commandGamepad));
+    }
+    
+    private void configureBindings(PrimaryEncoderTester encoderTester)
+    {        
+        commandGamepad.b().onTrue(new InstantCommand(() -> encoderTester.resetPosition()));
+        commandGamepad.y().onTrue(new SetPrimaryEncoderPosition(encoderTester, gamepad));
+        commandGamepad.rightStick().onTrue(new RunPrimaryEncoderWithGamepad(encoderTester, commandGamepad));
+    }
+    
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.

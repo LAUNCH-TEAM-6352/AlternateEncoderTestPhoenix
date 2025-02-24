@@ -5,15 +5,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.PrimaryEncoderTester;
 
 /** An example command that uses an example subsystem. */
 public class RunPrimaryEncoderWithGamepad extends Command
 {
     private final PrimaryEncoderTester encoderTester;
-    private final CommandXboxController gamepad;
+    private final XboxController gamepad;
 
     /**
      * Creates a new ExampleCommand.
@@ -21,7 +21,7 @@ public class RunPrimaryEncoderWithGamepad extends Command
      * @param alternateEncoderTester
      *            The subsystem used by this command.
      */
-    public RunPrimaryEncoderWithGamepad(PrimaryEncoderTester encoderTester, CommandXboxController gamepad)
+    public RunPrimaryEncoderWithGamepad(PrimaryEncoderTester encoderTester, XboxController gamepad)
     {
         this.encoderTester = encoderTester;
         this.gamepad = gamepad;

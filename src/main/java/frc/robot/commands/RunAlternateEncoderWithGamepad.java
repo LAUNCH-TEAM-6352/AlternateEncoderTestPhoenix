@@ -4,15 +4,15 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.AlternateEncoderTester;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.AlternateEncoderTester;
 
 /** An example command that uses an example subsystem. */
 public class RunAlternateEncoderWithGamepad extends Command
 {
     private final AlternateEncoderTester encoderTester;
-    private final CommandXboxController gamepad;
+    private final XboxController gamepad;
 
     /**
      * Creates a new ExampleCommand.
@@ -20,7 +20,7 @@ public class RunAlternateEncoderWithGamepad extends Command
      * @param encoderTester
      *            The subsystem used by this command.
      */
-    public RunAlternateEncoderWithGamepad(AlternateEncoderTester encoderTester, CommandXboxController gamepad)
+    public RunAlternateEncoderWithGamepad(AlternateEncoderTester encoderTester, XboxController gamepad)
     {
         this.encoderTester = encoderTester;
         this.gamepad = gamepad;

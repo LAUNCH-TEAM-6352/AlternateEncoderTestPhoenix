@@ -87,14 +87,14 @@ public class RobotContainer
     {        
         commandGamepad.x().onTrue(new InstantCommand(() -> encoderTester.resetPosition()));
         commandGamepad.a().onTrue(new SetAlternateEncoderPosition(encoderTester, gamepad));
-        commandGamepad.leftStick().onTrue(new RunAlternateEncoderWithGamepad(encoderTester, commandGamepad));
+        commandGamepad.leftStick().onTrue(new RunAlternateEncoderWithGamepad(encoderTester, gamepad));
     }
     
     private void configureBindings(PrimaryEncoderTester encoderTester)
     {        
         commandGamepad.b().onTrue(new InstantCommand(() -> encoderTester.resetPosition()));
         commandGamepad.y().onTrue(new SetPrimaryEncoderPosition(encoderTester, gamepad));
-        commandGamepad.rightStick().onTrue(new RunPrimaryEncoderWithGamepad(encoderTester, commandGamepad));
+        commandGamepad.rightStick().onTrue(new RunPrimaryEncoderWithGamepad(encoderTester, gamepad));
     }
     
 

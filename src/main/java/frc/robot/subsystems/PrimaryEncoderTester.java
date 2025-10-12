@@ -4,17 +4,11 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.EncoderConfig;
-import com.revrobotics.spark.config.SoftLimitConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,37 +28,21 @@ public class PrimaryEncoderTester extends SubsystemBase
     /** Creates a new ExampleSubsystem. */
     public PrimaryEncoderTester()
     {
-        EncoderConfig encoderConfig =
-            new EncoderConfig()
-                .positionConversionFactor(1)
-                .velocityConversionFactor(1); // velocity will be measured in hex shaft rotations per minuite
-
-        SoftLimitConfig softLimitConfig = 
-            new SoftLimitConfig()
-                .forwardSoftLimit(maxPosition)
-                .forwardSoftLimitEnabled(true)
-                .reverseSoftLimit(minPosition)
-                .reverseSoftLimitEnabled(true);
-
-        ClosedLoopConfig closedLoopConfig =
-            new ClosedLoopConfig()
-                .pidf(0.15, 0.0, 0.0, 0.0)
-                .iZone(0.0)
-                .outputRange(-0.5, +0.5)
-                .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-
-        SparkMaxConfig config = new SparkMaxConfig();
-        config
-            .idleMode(IdleMode.kBrake)
-            .inverted(false);
-
-        config
-            .apply(encoderConfig)
-            .apply(softLimitConfig)
-            .apply(closedLoopConfig);
-
-        motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        motor.clearFaults();
+        var motorConfig = new TalonFXConfiguration();
+        motorConfig.Slot0.kP = 0.15;
+        motorConfig.Slot0.kI = 0.0;
+        motorConfig.Slot0.kD = 0.0;
+        motorConfig.MotorOutput.PeakForwardDutyCycle = 0.5;
+        motorConfig.MotorOutput.PeakReverseDutyCycle = -0.5;
+        motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        motor.getConfigurator().apply(motorConfig);
+        
+        motor.clearStickyFaults();
         resetPosition();
     }
 
@@ -75,12 +53,12 @@ public class PrimaryEncoderTester extends SubsystemBase
 
     public double getPosition()
     {
-        return motor.getEncoder().getPosition();
+        return motor.getPosition().getValueAsDouble();
     }
 
     public void resetPosition()
     {
-        motor.getEncoder().setPosition(0);
+        motor.setPosition(0);
     }
 
     public void setPosition(double position, double tolerance)
@@ -97,7 +75,7 @@ public class PrimaryEncoderTester extends SubsystemBase
         targetPosition = position;
         targetTolerance = tolerance;
         lastPosition = getPosition();
-        motor.getClosedLoopController().setReference(targetPosition, ControlType.kPosition);
+        motor.setControl(new PositionDutyCycle(targetPosition).withSlot(0));
         atTargetPosition = false;
         isPositioningStarted = true;
     }
@@ -114,8 +92,8 @@ public class PrimaryEncoderTester extends SubsystemBase
         var position = getPosition();
 
         SmartDashboard.putNumber("Pri Pos", position);
-        SmartDashboard.putNumber("Pri RPM", motor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Pri Spd", motor.getAppliedOutput());
+        SmartDashboard.putNumber("Pri RPM", motor.getVelocity().getValueAsDouble() / 60.0);
+        SmartDashboard.putNumber("Pri Spd", motor.getClosedLoopOutput().getValueAsDouble());
 
         if (isPositioningStarted)
         {

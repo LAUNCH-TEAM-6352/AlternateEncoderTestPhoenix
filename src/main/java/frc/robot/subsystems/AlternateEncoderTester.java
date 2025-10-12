@@ -4,12 +4,10 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -23,7 +21,6 @@ public class AlternateEncoderTester extends SubsystemBase
 {
     private final TalonFX motor = new TalonFX(1);
     private final CANcoder canCoder = new CANcoder(0);
-    private final PositionVoltage motorPositionRequest = new PositionVoltage(0).withSlot(0).with;
 
     private double targetPosition;
     private double targetTolerance;
@@ -37,8 +34,8 @@ public class AlternateEncoderTester extends SubsystemBase
     public AlternateEncoderTester()
     {
         var motorConfig = new TalonFXConfiguration();
-        motorConfig.Feedback.FeedbackRemoteSensorID = canCoder.getDeviceID();
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        motorConfig.Feedback.FeedbackRemoteSensorID = canCoder.getDeviceID();
         motorConfig.Slot0.kP = 0.15;
         motorConfig.Slot0.kI = 0.0;
         motorConfig.Slot0.kD = 0.0;
@@ -90,7 +87,7 @@ public class AlternateEncoderTester extends SubsystemBase
         targetTolerance = tolerance;
         lastPosition = getPosition();
 
-        motor.setControl(motorPositionRequest.withPosition(targetPosition));
+        motor.setControl(new PositionDutyCycle(targetPosition).withSlot(0));
         atTargetPosition = false;
         isPositioningStarted = true;
     }

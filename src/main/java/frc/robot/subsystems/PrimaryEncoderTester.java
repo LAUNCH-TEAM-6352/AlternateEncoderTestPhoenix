@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class PrimaryEncoderTester extends SubsystemBase
 {
-    private final SparkMax motor = new SparkMax(1, MotorType.kBrushless);
+    private final TalonFX motor = new TalonFX(1);
 
     private double targetPosition;
     private double targetTolerance;

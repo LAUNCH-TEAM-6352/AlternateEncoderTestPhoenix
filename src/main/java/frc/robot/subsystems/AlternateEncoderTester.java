@@ -4,24 +4,26 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.AlternateEncoderConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.SoftLimitConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.SlotConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AlternateEncoderTester extends SubsystemBase
 {
-    private final SparkMax motor = new SparkMax(1, MotorType.kBrushless);
+    private final TalonFX motor = new TalonFX(1);
+    private final CANcoder canCoder = new CANcoder(0);
+    private final PositionVoltage motorPositionRequest = new PositionVoltage(0).withSlot(0).with;
 
     private double targetPosition;
     private double targetTolerance;
@@ -34,42 +36,27 @@ public class AlternateEncoderTester extends SubsystemBase
     /** Creates a new ExampleSubsystem. */
     public AlternateEncoderTester()
     {
-        AlternateEncoderConfig encoderConfig =
-            new AlternateEncoderConfig()
-                .averageDepth(64)
-                .countsPerRevolution(8192)
-                .inverted(true) // by default, cw rotation is negative
-                .measurementPeriod(100)
-                .positionConversionFactor(1)
-                .setSparkMaxDataPortConfig()
-                .velocityConversionFactor(1); // velocity will be measured in hex shaft rotations per minuite
+        var motorConfig = new TalonFXConfiguration();
+        motorConfig.Feedback.FeedbackRemoteSensorID = canCoder.getDeviceID();
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        motorConfig.Slot0.kP = 0.15;
+        motorConfig.Slot0.kI = 0.0;
+        motorConfig.Slot0.kD = 0.0;
+        motorConfig.MotorOutput.PeakForwardDutyCycle = 0.1;
+        motorConfig.MotorOutput.PeakReverseDutyCycle = -0.1;
+        motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        motor.getConfigurator().apply(motorConfig);
 
-        SoftLimitConfig softLimitConfig = 
-            new SoftLimitConfig()
-                .forwardSoftLimit(maxPosition)
-                .forwardSoftLimitEnabled(true)
-                .reverseSoftLimit(minPosition)
-                .reverseSoftLimitEnabled(true);
+        var canCoderConfig = new CANcoderConfiguration();
+        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+        canCoder.getConfigurator().apply(canCoderConfig);
 
-        ClosedLoopConfig closedLoopConfig =
-            new ClosedLoopConfig()
-                .pidf(0.15, 0.0, 0.0, 0.0)
-                .iZone(0.0)
-                .outputRange(-0.1, +0.1)
-                .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder);
-
-        SparkMaxConfig config = new SparkMaxConfig();
-        config
-            .idleMode(IdleMode.kBrake)
-            .inverted(false);
-
-        config
-            .apply(encoderConfig)
-            .apply(softLimitConfig)
-            .apply(closedLoopConfig);
-
-        motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        motor.clearFaults();
+        motor.clearStickyFaults();
         resetPosition();
     }
 
@@ -80,12 +67,12 @@ public class AlternateEncoderTester extends SubsystemBase
 
     public double getPosition()
     {
-        return motor.getAlternateEncoder().getPosition();
+        return canCoder.getPosition().getValueAsDouble();
     }
 
     public void resetPosition()
     {
-        motor.getAlternateEncoder().setPosition(0);
+        canCoder.setPosition(0);
     }
 
     public void setPosition(double position, double tolerance)
@@ -102,7 +89,8 @@ public class AlternateEncoderTester extends SubsystemBase
         targetPosition = position;
         targetTolerance = tolerance;
         lastPosition = getPosition();
-        motor.getClosedLoopController().setReference(targetPosition, ControlType.kPosition);
+
+        motor.setControl(motorPositionRequest.withPosition(targetPosition));
         atTargetPosition = false;
         isPositioningStarted = true;
     }
@@ -119,8 +107,8 @@ public class AlternateEncoderTester extends SubsystemBase
         var position = getPosition();
 
         SmartDashboard.putNumber("Alt Pos", position);
-        SmartDashboard.putNumber("Alt RPM", motor.getAlternateEncoder().getVelocity());
-        SmartDashboard.putNumber("Alt Spd", motor.getAppliedOutput());
+        SmartDashboard.putNumber("Alt RPM", canCoder.getVelocity().getValueAsDouble() / 60.0);
+        SmartDashboard.putNumber("Alt Spd", motor.getClosedLoopOutput().getValueAsDouble());
 
         if (isPositioningStarted)
         {

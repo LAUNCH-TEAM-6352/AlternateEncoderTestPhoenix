@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AlternateEncoderTester;
 
@@ -45,11 +46,11 @@ public class RunAlternateEncoderWithGamepad extends Command
             (speed > 0 && position >= encoderTester.maxPosition))
         {
             speed = 0;
-            // turn on rumble
+            gamepad.setRumble(RumbleType.kBothRumble, 1);
         }
         else
         {
-            // turn off rumble
+            gamepad.setRumble(RumbleType.kBothRumble, 0);
         }
 
         encoderTester.setMotorSpeed(speed);

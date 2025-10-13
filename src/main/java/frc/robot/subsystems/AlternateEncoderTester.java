@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AlternateEncoderTester extends SubsystemBase
 {
-    private final TalonFX motor = new TalonFX(1);
+    private final TalonFX motor = new TalonFX(0);
     private final CANcoder canCoder = new CANcoder(0);
 
     private double targetPosition;
@@ -104,8 +104,9 @@ public class AlternateEncoderTester extends SubsystemBase
         var position = getPosition();
 
         SmartDashboard.putNumber("Alt Pos", position);
-        SmartDashboard.putNumber("Alt RPM", canCoder.getVelocity().getValueAsDouble() / 60.0);
+        SmartDashboard.putNumber("Alt RPM", canCoder.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Alt Spd", motor.getClosedLoopOutput().getValueAsDouble());
+        SmartDashboard.putNumber("Alt V", motor.getMotorVoltage().getValueAsDouble());
 
         if (isPositioningStarted)
         {

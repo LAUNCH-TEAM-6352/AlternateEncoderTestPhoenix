@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class PrimaryEncoderTester extends SubsystemBase
 {
-    private final TalonFX motor = new TalonFX(1);
+    private final TalonFX motor = new TalonFX(0);
 
     private double targetPosition;
     private double targetTolerance;
@@ -94,6 +94,7 @@ public class PrimaryEncoderTester extends SubsystemBase
         SmartDashboard.putNumber("Pri Pos", position);
         SmartDashboard.putNumber("Pri RPM", motor.getVelocity().getValueAsDouble() / 60.0);
         SmartDashboard.putNumber("Pri Spd", motor.getClosedLoopOutput().getValueAsDouble());
+        SmartDashboard.putNumber("Pri V", motor.getMotorVoltage().getValueAsDouble());
 
         if (isPositioningStarted)
         {

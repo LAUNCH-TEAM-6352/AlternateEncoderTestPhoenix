@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,8 +33,8 @@ import frc.robot.subsystems.PrimaryEncoderTester;
 public class RobotContainer
 {
     // The robot's subsystems and commands are defined here...
-    private final Optional<AlternateEncoderTester> alternateEncoderTester;
-    private final Optional<PrimaryEncoderTester> primaryEncoderTester;
+    private Optional<AlternateEncoderTester> alternateEncoderTester = Optional.empty();
+    private Optional<PrimaryEncoderTester> primaryEncoderTester = Optional.empty();
 
     private final CommandXboxController commandGamepad = new CommandXboxController(0);
     public final XboxController gamepad = new XboxController(0);
@@ -42,11 +44,15 @@ public class RobotContainer
      */
     public RobotContainer()
     {
-        //alternateEncoderTester = Optional.of(new AlternateEncoderTester())
-        alternateEncoderTester = Optional.empty();
-
-        primaryEncoderTester = Optional.of(new PrimaryEncoderTester());
-        //primmaryEncoderTester = Optional.empty();
+        var gameData = DriverStation.getGameSpecificMessage().toLowerCase();
+        if (gameData.contains("-pet-"))
+        {
+            primaryEncoderTester = Optional.of(new PrimaryEncoderTester());
+        }
+        else if (gameData.contains("-aet"))
+        {
+            alternateEncoderTester = Optional.of(new AlternateEncoderTester());
+        }
 
         // Configure the trigger bindings
         configureBindings();

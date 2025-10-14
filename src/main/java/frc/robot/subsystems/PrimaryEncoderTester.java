@@ -92,9 +92,10 @@ public class PrimaryEncoderTester extends SubsystemBase
         var position = getPosition();
 
         SmartDashboard.putNumber("Pri Pos", position);
-        SmartDashboard.putNumber("Pri RPM", motor.getVelocity().getValueAsDouble() / 60.0);
-        SmartDashboard.putNumber("Pri Spd", motor.getClosedLoopOutput().getValueAsDouble());
+        SmartDashboard.putNumber("Pri RPM", motor.getVelocity().getValueAsDouble() * 60.0);
+        SmartDashboard.putNumber("Pri DC", motor.getClosedLoopOutput().getValueAsDouble());
         SmartDashboard.putNumber("Pri V", motor.getMotorVoltage().getValueAsDouble());
+        SmartDashboard.putBoolean("Pri PS", isPositioningStarted);
 
         if (isPositioningStarted)
         {

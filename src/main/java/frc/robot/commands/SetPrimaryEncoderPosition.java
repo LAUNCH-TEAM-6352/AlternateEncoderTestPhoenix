@@ -23,7 +23,7 @@ public class SetPrimaryEncoderPosition extends Command
             put(-1, 0.0);
             put(0, 1024.0);
             put(90, 2048.0);
-            put(190, 3072.0);
+            put(180, 3072.0);
             put(270, 4096.0);
         }
     };
@@ -42,7 +42,7 @@ public class SetPrimaryEncoderPosition extends Command
     @Override
     public void initialize()
     {
-        encoderTester.setPosition(positionMap.get(gamepad.getPOV()), 2);
+        encoderTester.setPosition(positionMap.get(gamepad.getPOV()), .2);
     }
 
     // Called every time the scheduler runs while the command is scheduled.

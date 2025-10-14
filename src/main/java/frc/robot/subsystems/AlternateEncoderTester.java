@@ -104,9 +104,10 @@ public class AlternateEncoderTester extends SubsystemBase
         var position = getPosition();
 
         SmartDashboard.putNumber("Alt Pos", position);
-        SmartDashboard.putNumber("Alt RPM", canCoder.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("Alt Spd", motor.getClosedLoopOutput().getValueAsDouble());
+        SmartDashboard.putNumber("Alt RPM", canCoder.getVelocity().getValueAsDouble() * 60.0);
+        SmartDashboard.putNumber("Alt DC", motor.getClosedLoopOutput().getValueAsDouble());
         SmartDashboard.putNumber("Alt V", motor.getMotorVoltage().getValueAsDouble());
+        SmartDashboard.putBoolean("Alt PS", isPositioningStarted);
 
         if (isPositioningStarted)
         {

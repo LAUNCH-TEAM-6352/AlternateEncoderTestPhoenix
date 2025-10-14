@@ -15,7 +15,7 @@ public class SetAlternateEncoderPosition extends Command
 
 {
     private final AlternateEncoderTester alternateEncoderTester;
-    private final double position;
+    private final XboxController gamepad;
 
     private final HashMap<Integer, Double> positionMap = new HashMap<Integer, Double>()
     {
@@ -32,8 +32,7 @@ public class SetAlternateEncoderPosition extends Command
     public SetAlternateEncoderPosition(AlternateEncoderTester alternateEncoderTester, XboxController gamepad)
     {
         this.alternateEncoderTester = alternateEncoderTester;
-
-        this.position = positionMap.get(gamepad.getPOV());
+        this.gamepad = gamepad;
 
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(alternateEncoderTester);
@@ -43,7 +42,7 @@ public class SetAlternateEncoderPosition extends Command
     @Override
     public void initialize()
     {
-        alternateEncoderTester.setPosition(position, 0.2);
+        alternateEncoderTester.setPosition(positionMap.get(gamepad.getPOV()), 0.01);
     }
 
     // Called every time the scheduler runs while the command is scheduled.
